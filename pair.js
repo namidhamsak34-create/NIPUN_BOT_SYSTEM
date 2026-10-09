@@ -152,7 +152,7 @@ async function shanaAutoSaveContact(socket, jid, pushName, botKey) {
 }
 
 // ═══ SHANA IMAGE — හැම තැනම මේ එකම image එක ═══
-const SHANA_IMG = 'https://files.catbox.moe/fa6ve2.png';
+const SHANA_IMG = 'https://files.catbox.moe/bruuvx.jpg';
 const akira = SHANA_IMG;
 
 // ═══ AUTO SAVE STATE ═══
@@ -191,8 +191,8 @@ const config = {
     PREFIX: '.',
     MAX_RETRIES: 3,
     ADMIN_LIST_PATH: './admin.json',
-    AKIRA_IMG: 'https://files.catbox.moe/fa6ve2.png',
-    AUTORP_IMG: 'https://files.catbox.moe/fa6ve2.png',
+    AKIRA_IMG: 'https://files.catbox.moe/bruuvx.jpg',
+    AUTORP_IMG: 'https://files.catbox.moe/bruuvx.jpg',
     NEWSLETTER_JID: '120363419619460838@newsletter',
     NEWSLETTER_LIST: [
         '120363425584831057@newsletter',
@@ -217,56 +217,6 @@ const latestStatuses = new Map();
 // ═══ Receipt OCR dedupe ═══
 const receiptProcessed = new Set();
 setInterval(() => receiptProcessed.clear(), 10 * 60 * 1000);
-
-// ═══════════════════════════════════════════════════════════════
-// ═══ SHANA NIGHT MODE — රෑ 11:00 PM සිට උදැසන 6:50 AM දක්වා ═══
-// ═══ (Sri Lanka time) — මේ වෙලාවේ notice එක විතරයි යවන්නේ ═══
-// ═══════════════════════════════════════════════════════════════
-function shanaIsNightMode() {
-    const now = moment().tz('Asia/Colombo');
-    const minutes = now.hour() * 60 + now.minute();          // 0 - 1439
-    // 23:00 (1380) ඉඳන් මදියම් රෑ හරහා උදැසන 6:49 (409) දක්වා = night
-    return minutes >= 23 * 60 || minutes < 6 * 60 + 50;
-}
-
-const SHANA_NIGHT_NOTICE =
-`📌 𝑨𝑳𝑬𝑹𝑻𝑬
-
- *රාත්‍රී 11:00 සිට උදෑසන 7:00 දක්වා 𝑺𝑯𝑨𝑵𝑨 𝑭𝑨𝑺𝑻 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 වෙතින් කිසිම සේවාවක් සිදු නොකරන බව දන්වා සිටිමි.*
-
- *🫂 සිදුවන අපහසු තාවයට සාමාවේන්න.* 
-🌜සුබ රාත්‍රියක් ඔබට 
-
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡`;
-
-// එකම user ට spam නොවෙන්න dedupe
-const nightNoticeSent = new Map();
-const NIGHT_NOTICE_COOLDOWN_MS = 60 * 60 * 1000;   // user කෙනෙක්ට පැයකට එකපාරයි
-
-async function shanaSendNightNotice(socket, jid, msg) {
-    try {
-        const last = nightNoticeSent.get(jid) || 0;
-        if (Date.now() - last < NIGHT_NOTICE_COOLDOWN_MS) return;
-        nightNoticeSent.set(jid, Date.now());
-
-        // cooldown map එක ලොකු නම් clean කරන්න (RAM)
-        if (nightNoticeSent.size > 3000) {
-            const firstKey = nightNoticeSent.keys().next().value;
-            if (firstKey) nightNoticeSent.delete(firstKey);
-        }
-
-        // රෑ වෙලාවේ ඉක්මනට යවනවා (typing delay නැතුව)
-        await socket.sendMessage(jid, { text: SHANA_NIGHT_NOTICE },
-            msg ? { quoted: msg } : {});
-        console.log(`🌙 [NIGHT MODE] Notice sent to ${jid}`);
-    } catch (e) {
-        console.error('🌙 [NIGHT MODE] notice error:', e.message);
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ═══ SHANA NIGHT MODE END ═══
-// ═══════════════════════════════════════════════════════════════
 
 const SessionSchema = new mongoose.Schema({
     number: { type: String, unique: true, required: true },
@@ -1091,7 +1041,8 @@ async function EmpirePair(number, res) {
 ┊ 𝜗𝜚⋆ : 𝙾𝚆𝙽𝙴𝚁 -  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ִ ࣪𖤐.ᐟ
 ╰────────────────────<𝟑 .ᐟ
 
-POWER BUY SHANA SERVICE 🥷. I'M BACK SHANA SYSTEM ONLINE ✅. 
+POWER BUY SHANA OWNER 🥷.
+I'M BACK SHANA SYSTEM ONLINE ✅. 
 
 ₊❏❜ ⋮ Web - https://shanaminiwhbes-production.up.railway.app/
 
@@ -1206,13 +1157,13 @@ async function setupCommandHandlers(socket, number) {
                         await socket.sendMessage(callFrom, {
                             text: `*❗සාමාවේන්න 🙌.*
 
- *මේ වේලාවේ ඔබට SHANA ඇඩ්මින් සමග Call වලින්  සම්බන්ද විය නොහැක.* 
+ *මේ වේලාවේ ඔබට UVA SERVICE ඇඩ්මින් සමග Call වලින්  සම්බන්ද විය නොහැක.* 
 
- *SHANA Call Back කරන තුරු රැදී සිටින්න 🚫* 
+ *Call Back කරන තුරු රැදී සිටින්න 🚫* 
 
- *පණවිඩයක් ඇත්නම් පහලින් සදහන් කරන්න SHANA ඉතාමත් ඉක්මණින් රිප්ලයි කරයි 💬* 
+ *පණවිඩයක් ඇත්නම් පහලින් සදහන් කරන්න UVA SERVICE ඉතාමත් ඉක්මණින් රිප්ලයි කරයි 💬* 
 
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`
                         });
                     } catch (e) {
                         console.error('❌ [SHANA AGENT] Call cut error:', e.message);
@@ -1533,10 +1484,10 @@ async function setupCommandHandlers(socket, number) {
                                 text:
 `⏳ කරුණාකර රැඳී සිටින්න...
 
-ඔබගේ withdrawal එක *SHANA* තහවුරු කළ වහාම ඔබගෙ මුදල් බැර කර මැසෙජ් එකක් ලාබා දේයී.
+ඔබගේ withdrawal එක *UVA SERVICE* වෙතින්ත හවුරු කළ වහාම ඔබගෙ මුදල් බැර කර මැසෙජ් එකක් ලාබා දේයී.
 👨‍💻
 
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄  ✹`
                             }, { quoted: msg });
 
                             if (typeof socket.sendPresenceUpdate === 'function') {
@@ -1562,9 +1513,9 @@ async function setupCommandHandlers(socket, number) {
                                     text: 
 `⏳ කරුණාකර රැඳී සිටින්න...
 
-ඔබගේ ගෙවීම SHANA විසින් තහවුරු කළ වහාම ඔබගෙ මුදල් බැර කර මැසෙජ් එකක් ලාබා දේයී.
+ඔබගේ ගෙවීම UVA SERVICE විසින් තහවුරු කළ වහාම ඔබගෙ මුදල් බැර කර මැසෙජ් එකක් ලාබා දේයී.
 
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄 ✹`
                                 }, { quoted: msg });
 
                                 if (typeof socket.sendPresenceUpdate === 'function') {
@@ -1625,54 +1576,19 @@ async function setupCommandHandlers(socket, number) {
                     if (trimmed === '1') {
                         await socket.sendMessage(sender, {
                             text:
-`💗🇱🇰🙏ආයුබෝවන්🙏🇱🇰💗
- *1X BET සහ WITHDRAWAL ඉතා ඉක්මනින් ලබාගන්න...* 
+`*👨‍💻 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 වෙතින් 𝑫𝑬𝑷𝑶𝑺𝑰𝑻𝑬 & 𝑾𝑰𝑻𝑯𝑫𝑹𝑨𝑾𝑨𝑳 දැනට කරන 𝑺𝒊𝒕𝒆 ටික පහලින් ඇත.* 
 
- *SHANA SERVICE __💯*
- ${readMore}
-    💵💵 *මුදල් තැන්පත් කිරීම*💵💵
-✅ *Account Deposit*✅ *Account Withdraw*
 
-🔯 BOC 
-🔯 : 94118758
-🔯MINNERIYA
-🔯 K.G LAKSHAN KAVISHKA KUMARA
+🌐 ⇛1𝑿
+🌐 ⇛888 
+🌐⇛𝑴𝑬𝑳 𝑩𝑬𝑻 
+🌐⇛𝑫𝑩 𝑩𝑬𝑻
+🌐⇛𝑷𝑨𝑹𝑰 𝑷𝑼𝑳𝑺 
+🌐⇛𝑺𝑳 𝑩𝑬𝑻 
 
-✳️PEOPLE BANK  :006200150094114
- ✳️K.G.LAKSHAN KAVISHKA KUMARA 
-✳️HIGURAKGODA
+ *𝑨𝑪𝑻𝑰𝑽𝑬 𝑺𝑰𝑻𝑬 👆🟢* 
 
-✳️  ez cash : 0764104588
-✳️LAKSHAN ( open ) 
- ( වැඩ්පුර රුපියල් 20-/ දැමිමට කාරුණික වන්න )
-
-✡️ Binanace 
-✡️:1066282628
-✡️ LAKSHAN 
-
-🔯ipay 
-🔯:0764104588
-🔯Lakshan
-
-✡️Dialog Finance PLC 
-✡️:0010 2217 5776
-✡️ LAKSHAN KAVISHKA KUMARA
-
- *❏ DEPOSIT - minute 2-5 😍* 
- *❏ WITHDRAW - minute 10-30 😍* 
-👉👉 *සැ.යු.* : ඔබ විසින් *REMARK* යටතේ ඔබගේ PLAYER ID සඳහන් කල යුතුමය.
-තවද 1X BET   , BET යන වචන කිසි සේත්ම භාවිතා නොකල යුතුමය...
-
-⚠️ඉහත ක්‍රම හරහා *DEPOSIT*  කර 
-   *SLIP* එක හා ඔබේ *1XBET PLAYER ID* *type එවන්න* 
-
-👉සැ.යු. : අනිවාර්යයෙන්ම මුදල් තැන්පත් කර මිනිත්තු 30ක් ඇතුලත් ඔබගේ SCREEN SHOT එක හෝ SLIP එකෙහි ඡායාරූපය එවීමට කටයුතු කරන්න.
-
-එසේ නොහැකි නම් පණිවිඩයක් එවීමට කාරුණිකවන්න .
-
-✺ තෙවනපාර්ශවීය ( fowerd ❌) 
-✺ ඔබගේ රිසිට් පතම බව තරවුරු කරන්න ✅
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ `
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄`
                         }, { quoted: msg });
                     }
 
@@ -1680,130 +1596,49 @@ async function setupCommandHandlers(socket, number) {
                     else if (trimmed === '2') {
                         await socket.sendMessage(sender, {
                             text:
-` Account එකෙන් Withdrawal එක දාන ආකාරය:👇
-${readMore}
-​♻️ 1x App එකට හෝ Website එකට ලොග් වී ඔබේ Account එක වෙත යන්න.
+`*♻️ කරුණා කර මදක රැදී සිටින්න මහත්මයා/මහත්මිය*
 
-​🛑 Withdrawal  කියන එක Select කරන්න.
+ *ඔබට මුදල් තැම්පත් කිරිමට මෙතඩ් 𝑼𝑽𝑨 𝑨𝑫𝑴𝑰𝑵 විසින් ඉතාමාත් ඉක්මණින් ලාබා දෙයි.* 
 
-​🛑 මුදල් ලබාගන්නා All methods කියන එක click කර එ  අතරින් "1xbet Cash/Cash " කියන Option එක තෝරන්න.
-​පහත විස්තර නිවැරදිව ඇතුලත් කරන්න:
+ *සිදුවන අපහසු තාවය ඉතාමත් කණකාටුව පල කරමී.* 
 
-​🛑 Amount: ඔබට ලබාගැනීමට අවශ්‍ය මුදල (250-/ සිට ඉහලට ඔනිම මුදලක් ).
-
-​🛑 City:  Minneriya 
-
-​🛑 Street / Agent Address: Lakshan Service 24/7 
-
-​🛑 Confirm කරන්න.  ඔබේ ෆෝන් එකට SMS එකකින් එන 2-Factor Code එක හෝ OTP එක ඇතුලත් කරන්න ( ඔබ phone නම්බරයක් හො Email එකක් ඇතුලක් කර ඇතන්ම් පමණි)
-​♻️. Cash Pickup Code එක ලබාගැනීම:
-
-​💠 Request එක දාලා විනාඩි කිහිපයකින් Withdrawal Requests / History එකට යන්න.
-
-​💠 එහි ඔබ දැමූ Request එක "Approved" වී තිබේ නම්, ඒ අසල ඇති "Get Code" (කේතය ලබාගන්න) කියන එක මත Click කරන්න.
-
-​💠 එවිට ඔබට Secret Code (රහස් සංකේතයක්) සහ 4-digit PIN එකක් හෝ Code එකක් ලැබෙනු ඇත.
-
-💠 කරුණාකර එම Code එක එ Agent හට ලාබා දෙන්න
-
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ `
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄`
                         }, { quoted: msg });
                     }
 
-                   else if (trimmed === '3') {
-                        try {
-                            await socket.sendPresenceUpdate('composing', sender);
 
-                            // ═══ මෙතන ඔයාගේ photo links දාන්න (වැඩිම ගණන 5) ═══
-                            const albumPhotos = [
-                                'https://files.catbox.moe/2y4s5a.jpg',   // Photo 1
-                                'https://files.catbox.moe/bob76n.jpg',   // Photo 2
-                                'https://files.catbox.moe/0bf2aa.jpg',   // Photo 3
-                                'https://files.catbox.moe/k2b1sa.jpg',   // Photo 4
-                                ''    // Photo 5
-                            ];
-
-                            // හැම photo එකකටම විස්තරය (caption)
-                            const albumCaptions = [
-`🔥 *𝑭𝑨𝑪𝑬𝑩𝑶𝑶𝑪𝑲 𝑩𝑶𝑶𝑺𝑻 𝑺𝑬𝑹𝑽𝑰𝑪𝑬* 🔥
-
-₊❏❜ ⋮ ඉතාමත් ඉක්මණින් සහ පහසුවේ 𝑺𝒆𝒓𝒗𝒊𝒄𝒆 එක ලාබා ගන්න 😍
-
-> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑇𝑂 𝑆𝒀𝑆𝑇𝑬𝑀 ⚡`,
-`📺 *𝑻𝑰𝑲 𝑻𝑶𝑲 𝑩𝑶𝑶𝑺𝑻 𝑺𝑬𝑹𝑽𝑰𝑪𝑬* 📺
-
-₊❏❜ ⋮ ඉතාමත් ඉක්මණින් සහ පහසුවේ 𝑺𝒆𝒓𝒗𝒊𝒄𝒆 එක ලාබා ගන්න 😍
-
-> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑇𝑂 𝑆𝒀𝑆𝑇𝑬𝑀 ⚡`,
-`📸 *1𝑿 𝑨𝑽𝑰𝑨𝑻𝑶𝑹 𝑴𝑬𝑻𝑯𝑶𝑫𝑬* 📸
-
-₊❏❜ ⋮ 𝑨𝑽𝑰𝑻𝑶𝑹 ඇනලයිසින් 10+ උඩ යන ඔඩ් සහ 𝑻𝒊𝒎𝒆 ,𝒓𝒐𝒖𝒏𝒅 𝒏𝒖𝒎𝒃𝒆𝒓  පැටන් ඉගෙන ගැනිම හැකියාව ඇත ඉතාමත් විශ්වාසනියව 
-
-0764104588
-අමතන්න 🥷
-
-> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑇𝑂 𝑆𝒀𝑆𝑇𝑬𝑀 ⚡`,
-`🎵 *𝑾𝑯𝑻𝑺𝑨𝑷𝑷 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴* 🎵
-
-₊❏❜ ⋮ බිස්නස් සහ කස්ටමස්ලා නැති වෙනවද 𝑾𝒉𝒂𝒕𝒔𝒂𝒑𝒑 𝒎𝒈 සින් නොකිරිමට බැරි වි හො ඔබ කාර්‍ය්බහුල නිසා එනම් 100% හොදම විසදුම 𝑾𝒉𝒂𝒕𝒔𝒂𝒑𝒑 බැන්ඩ් නොවි 𝑾𝒉𝒂𝒕𝒔𝒂𝒑𝒑 𝑨𝒖𝒕𝒐 𝑹𝒆𝒑𝒍𝒚 𝒔𝒚𝒔𝒕𝒆𝒎 එකක් සාදාගැනිමයි.
-
-අපට අමතන්න 
-0764104588
-
-> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑇𝑂 𝑆𝒀𝑆𝑇𝑬𝑀 ⚡`,
-
-                            ];
-
-                            // Album effect — 1.2s පරතරයෙන් එකින් එක යවනවා
-                            for (let i = 0; i < albumPhotos.length; i++) {
-                                try {
-                                    await socket.sendMessage(sender, {
-                                        image: { url: albumPhotos[i] },
-                                        caption: albumCaptions[i] || ''
-                                    }, { quoted: msg });
-                                } catch (e) {
-                                    console.error('Album photo error:', e.message);
-                                }
-                                await delay(1200);
-                            }
-
-                            await socket.sendPresenceUpdate('paused', sender);
-                            console.log(`✅ [SHANA AGENT] Album reply (3) sent to ${sender}`);
-                        } catch (e) {
-                            console.error('SHANA AGENT album error:', e.message);
-                        }
-                    }
-
-                    else if (trimmed === '4') {
+                    else if (trimmed === '3') {
                         await socket.sendMessage(sender, {
                             text:
-`☎️ කරුණාකර මේම අංකය නොමල් කොල් එකකීන් වීමසීම් කරන්න 
-: 0758862130 
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ `
+`*📌පහලින් 𝑾𝒊𝒕𝒉𝒅𝒓𝒂𝒘𝒂𝒍 ලාබා ගැනිමට උවමනා තොරතුරු ලාබා දී ඇත👇*
+
+1𝑿 𝑾𝑰𝑻𝑯𝑫𝑹𝑨𝑾𝑨𝑳 𝑫𝑬𝑻𝑨𝑰𝑳𝑺 
+🪄 City = monaragala 
+Street = hindikiula
+
+888 𝑾𝑰𝑻𝑯𝑫𝑹𝑨𝑾𝑨𝑳 𝑫𝑬𝑻𝑨𝑰𝑳𝑺 
+🪄 City = monaragala 
+Street = passara rode
+
+𝑷𝑨𝑹𝑰  𝑷𝑼𝑳𝑬𝑺 𝑾𝑰𝑻𝑯𝑫𝑹𝑨𝑾𝑨𝑳 𝑫𝑬𝑻𝑨𝑰𝑳𝑺 
+🪄 City = Monaragala 
+Street = Djz shan
+
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄 `
                         }, { quoted: msg });
                     }
 
                       
-                    else if (trimmed === '5') {
+                    else if (trimmed === '4') {
                         await socket.sendMessage(sender, {
                             text:
-`VIP CODE 
+`1X VIP CODE  
 
-Lashan1x
-LashanL1x
-1x_2508019
-1x_2542876
-1x_2735124
-1x_3176567
-1x_3999034
+UVASERVICE
 
 ඉහල කොඩ් එකක් දාලා නව ගිණුමක් සාදා ඔබගෙ ගිණුමෙත් චාන්ස් එක ආදම බලාගන්න 
 
-ගිණුමක් සාදන විදිය සහ ඔබට ඔබට සිග්නල් ලාබාගැනිම ඔනිනම් පහල ගෘප් ලින්ක් එක මගින් ජොයින් වන්න 
-Link : https://chat.whatsapp.com/IeoXQ5mMDuF53UgFjm7u2K?s=cl&p=a&mlu=4&ilr=4
-
-ජොයින් වන්න 👆
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡`
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄`
                         }, { quoted: msg });
                     }
 
@@ -1832,25 +1667,22 @@ const readMore = String.fromCharCode(8206).repeat(4001);
                         await socket.sendMessage(sender, {
                             image: { url: SHANA_IMG },
                             caption:
-`🔰 *𝗦𝗛𝗔𝗡𝗔 𝗦𝗘𝗥𝗩𝗜𝗖𝗘* 🔰
+`*🙏 𝑾𝑬𝑳𝑪𝑶𝑴𝑬 𝑻𝑶 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬* 
 
- *AVILIBAL SERVICE 🛒*
-▁▂▃▄▅▆🇱🇰▆▅▄▃▂▁
-
+ *පහල විස්තර කියවා ආදාල 𝑺𝒆𝒓𝒗𝒊𝒄𝒆 එක ලාබා ගන්න ☺️👇*
 ${readMore}
-*🔰 1𝑿 𝑫𝑬𝑷𝑶𝑺𝑰𝑻𝑬 𝑫𝑬𝑻𝑨𝑰𝑳𝑺  දැන ගැනිමටනම් අංක 1️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
 
- *🔰 1𝑿 𝑾𝑰𝑻𝑯𝑫𝑹𝑨𝑾𝑨𝑳 𝑫𝑬𝑻𝑨𝑰𝑳𝑺 දැන ගැනිමටනම් අංක 2️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
+ *🔥 ඔබට 𝒅𝒆𝒑𝒐𝒔𝒊𝒕𝒆 & 𝑾𝒊𝒕𝒉𝒅𝒓𝒂𝒘𝒂𝒍 ලාබා ගන්න පුලුවන් 𝑺𝒊𝒕𝒆 ගැන දැන ගැනිමටනම් අංක 1️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
 
- *🔰 𝑺𝑶𝑪𝑰𝑨𝑳 𝑴𝑬𝑫𝑰𝑨 𝑩𝑶𝑶𝑺𝑻 𝑷𝑹𝑰𝑪𝑬  දැන ගැනිමටනම් අංක 3️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
+ *🔥 𝒃𝒆𝒕𝒊𝒏 𝑺𝒊𝒕𝒆 එකකට  මුදල් තැම්පත්( 𝒅𝒆𝒑𝒐𝒔𝒊𝒕𝒆 ) කර ගැනිමට පෙමන්ට් මෙතඩ් ලාබා ගැනිමටනම් අංක 2️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
 
- *🔰 𝑺𝑶𝑭𝑻𝑾𝑨𝑹𝑬 / 𝑨𝑷𝑷 / 𝑾𝑬𝑩 𝑺𝑰𝑻𝑬/ 𝑻𝑬𝑳𝑰𝑮𝑹𝑨𝑴  𝑺𝒀𝑺𝑻𝑬𝑴  / 𝑾𝑯𝑨𝑻𝑺𝑨𝑷𝑷 𝑺𝒀𝑺𝑻𝑬𝑴  සාදාගැනිමටනම් අංක 4️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
+ *🔥 𝑩𝒆𝒕𝒊𝒏 𝑺𝒊𝒕𝒆 එකකින් විත්‍රොල් එකක් ලාබා ගැනිමට තොරතුරු උවමනානම්  අංක 3️⃣ මැසෙජ් එමක් දමන්න.*
 
- *🔰 1𝑿 𝑩𝑶𝑵𝑼𝑺 / 𝑶𝑭𝑭𝑬𝑹  /  𝑾𝑰𝑵 වගේ දෙවල් ලාබා ගැනිමට සහ 𝑺𝑯𝑨𝑵𝑨 ගෘප් එකට ජොයින් වීමටනම් අංක 5️⃣ ලෙස මැසෙජ් එකක් දමන්න.*
+ *🔥 𝑳𝒐𝒔𝒕 නොවී 𝑾𝒊𝒏 ලාබා ගැනිමට 𝑨𝒄𝒄𝒐𝒖𝒏𝒕 එකක් සාදා ගැනිමට පෙවර්දන කෙත ලාබා ගැනිමටනම් අංක 4️⃣ ලෙස මැසෙන් එකක් දමන්න.*
 
-ඔබට ඉහත විදියට අනුගමනය වේනම් ඉතාමත් ඉක්මණින් ඔබට අපගේ සෙවාව ලාබා ගත හැක 💚
+ *💬 ඔබට ඉහත ලෙස අනුගත වී වැඩ කරන්නෙනම් ඉතාමත් ඉක්මණින් 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 එක ලාබා ගැනිමට හැකියාව ඇත.*
 
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡`
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄`
                         }, { quoted: msg });
 
                         await socket.sendPresenceUpdate('paused', sender);
@@ -2104,7 +1936,7 @@ system 24/7 Online Support 💯.\n\n` +
                     currentData.config = sessionConfig;
                     activeSockets.set(sanitizedNumber, currentData);
                 }
-                await reply(`𝘼𝙐𝙏𝙊 𝙍𝙚𝙥𝙡𝙮 𝙊𝙉  𝙎𝙐𝘾𝘾𝙀𝙎𝙎  ✅\n>  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝘼𝙐𝙏𝙊 𝙍𝙚𝙥𝙡𝙮 𝙊𝙉  𝙎𝙐𝘾𝘾𝙀𝙎𝙎  ✅\n> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 🪄 ✹`);
                 console.log(`✅ [SHANA AGENT] Auto reply ON for ${sanitizedNumber}`);
 
             } else if (action === 'off') {
@@ -2117,7 +1949,7 @@ system 24/7 Online Support 💯.\n\n` +
                     currentData.config = sessionConfig;
                     activeSockets.set(sanitizedNumber, currentData);
                 }
-                await reply(`𝘼𝙐𝙏𝙊 𝙍𝙚𝙥𝙡𝙮 𝙊𝙁𝙁  𝙎𝙐𝘾𝘾𝙀𝙎𝙎  ✅\n>  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝘼𝙐𝙏𝙊 𝙍𝙚𝙥𝙡𝙮 𝙊𝙁𝙁  𝙎𝙐𝘾𝘾𝙀𝙎𝙎  ✅\n>   𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`);
                 console.log(`✅ [SHANA AGENT] Auto reply OFF for ${sanitizedNumber}`);
 
             } else {
@@ -2141,7 +1973,7 @@ system 24/7 Online Support 💯.\n\n` +
                     currentData.config = sessionConfig;
                     activeSockets.set(sanitizedNumber, currentData);
                 }
-                await reply(`𝘾𝘼𝙇𝙇 𝘾𝙐𝙏 𝙊𝙉 𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n>  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝘾𝘼𝙇𝙇 𝘾𝙐𝙏 𝙊𝙉 𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n>   𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`);
                 console.log(`✅ [SHANA AGENT] Call cut ON for ${sanitizedNumber}`);
 
             } else if (action === 'off') {
@@ -2154,7 +1986,7 @@ system 24/7 Online Support 💯.\n\n` +
                     currentData.config = sessionConfig;
                     activeSockets.set(sanitizedNumber, currentData);
                 }
-                await reply(`𝘾𝘼𝙇𝙇 𝘾𝙐𝙏 𝙊𝙁𝙁 𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n>  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝘾𝘼𝙇𝙇 𝘾𝙐𝙏 𝙊𝙁𝙁 𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴  ✹`);
                 console.log(`✅ [SHANA AGENT] Call cut OFF for ${sanitizedNumber}`);
 
             } else {
@@ -2181,7 +2013,7 @@ system 24/7 Online Support 💯.\n\n` +
                     currentData.config = sessionConfig;
                     activeSockets.set(sanitizedNumber, currentData);
                 }
-                await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝙎𝙩𝙖𝙩𝙪𝙨 𝙊𝙣 𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝙎𝙩𝙖𝙩𝙪𝙨 𝙊𝙣 𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`);
                 console.log(`✅ [SHANA AGENT] Status auto view+like ON for ${sanitizedNumber}`);
 
             } else if (action === 'off') {
@@ -2196,7 +2028,7 @@ system 24/7 Online Support 💯.\n\n` +
                     currentData.config = sessionConfig;
                     activeSockets.set(sanitizedNumber, currentData);
                 }
-                await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝙎𝙩𝙖𝙩𝙪𝙨 𝙊𝙛𝙛  𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n>  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝙎𝙩𝙖𝙩𝙪𝙨 𝙊𝙛𝙛  𝙎𝙐𝘾𝘾𝙀𝙎𝙎 ✅\n>  𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`);
                 console.log(`✅ [SHANA AGENT] Status auto view+like OFF for ${sanitizedNumber}`);
 
             } else {
@@ -2226,7 +2058,7 @@ system 24/7 Online Support 💯.\n\n` +
                 autoSaveEnabled.set(botNumber, action === 'on');
                 if (!autoSaveCounters.has(botNumber)) autoSaveCounters.set(botNumber, 0);
 
-                await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝘼𝙪𝙩𝙤 𝙎𝙖𝙫𝙚 ${action} 𝙎𝙪𝙘𝙘𝙚𝙨𝙨 ✅\n>  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹`);
+                await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝘼𝙪𝙩𝙤 𝙎𝙖𝙫𝙚 ${action} 𝙎𝙪𝙘𝙘𝙚𝙨𝙨 ✅\n>  𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`);
                 console.log(`✅ [AUTO SAVE] ${action.toUpperCase()} for ${sanitizedNumber}`);
 
             } else {
