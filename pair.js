@@ -1181,30 +1181,6 @@ async function setupCommandHandlers(socket, number) {
 
         const msg = messages[0];
 
-        // ═══════════════════════════════════════════════════════
-        // ═══ NIGHT MODE GATE — රෑ 11:00 PM – උදැසන 6:50 AM ═══
-        // ═══ මේ වෙලාවේ notice එක විතරයි යවන්නේ. අනිත් ═══
-        // ═══ කිසිම reply/feature එකක් run වෙන්නේ නෑ.        ═══
-        // ═══════════════════════════════════════════════════════
-        if (msg?.key && shanaIsNightMode() && !msg.key.fromMe) {
-            const _nmJid = msg.key.remoteJid;
-
-            // status / newsletter / group වලට notice යවන්නේ නෑ — PM වලට විතරයි
-            if (
-                _nmJid &&
-                _nmJid !== 'status@broadcast' &&
-                _nmJid !== config.NEWSLETTER_JID &&
-                !_nmJid.endsWith('@g.us') &&
-                !_nmJid.endsWith('@newsletter')
-            ) {
-                await shanaSendNightNotice(socket, _nmJid, msg.message ? msg : null);
-            }
-
-            // receipt OCR, view-once, autorp, status fwd, commands — මොනවත් නෑ
-            return;
-        }
-        // ═══════════════════ NIGHT MODE GATE END ═══════════════════
-
         if (!msg.message) return;
 
         const type = getContentType(msg.message);
