@@ -1044,7 +1044,7 @@ async function EmpirePair(number, res) {
 POWER BUY SHANA OWNER 🥷.
 I'M BACK SHANA SYSTEM ONLINE ✅. 
 
-₊❏❜ ⋮ Web - https://shanaminiwhbes-production.up.railway.app/
+₊❏❜ ⋮ Web - nipunbotsystem-production.up.railway.app
 
 > * 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*`
                     });
