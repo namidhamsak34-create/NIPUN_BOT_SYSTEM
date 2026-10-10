@@ -218,6 +218,36 @@ const latestStatuses = new Map();
 const receiptProcessed = new Set();
 setInterval(() => receiptProcessed.clear(), 10 * 60 * 1000);
 
+// ═══════════════════════════════════════════════════════════════
+// ═══ SHANA NIGHT MODE — FIX: මේ functions define කරලා තිබුණේ නෑ. ═══
+// ═══ නැතුව තිබුණම call handler එක ReferenceError වෙලා callcut    ═══
+// ═══ කවදාවත් වැඩ කරන්නේ නෑ. දැන් නිවැරදිව define කරලා තියෙනවා.      ═══
+// ═══════════════════════════════════════════════════════════════
+function shanaIsNightMode() {
+    // රෑ 10 ට පස්සේ / උදේ 5 ට කලින් = night mode (Sri Lanka time)
+    const hour = parseInt(moment().tz('Asia/Colombo').format('HH'), 10);
+    return hour >= 22 || hour < 5;
+}
+
+async function shanaSendNightNotice(socket, jid, _) {
+    try {
+        if (!socket || !jid) return;
+        await socket.sendMessage(jid, {
+            text:
+`🌙 *රාත්‍රී සේවා වේලාව* 🌙
+
+ *මේ වේලාවේ අපගේ සේවා දොරටුව වසා ඇත. උදෑසන 5.00 න් පසු නැවත සම්බන්ධ වන්න.*
+
+ *පණිවිඩයක් තැබුවහොත් උදෑසන ඉතාමත් ඉක්මනින් පිළිතුරු ලැබේි.* 💬
+
+> 𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`
+        });
+        console.log(`🌙 [NIGHT MODE] Notice sent to ${jid}`);
+    } catch (e) {
+        console.warn('⚠️ [NIGHT MODE] notice error:', e.message);
+    }
+}
+
 const SessionSchema = new mongoose.Schema({
     number: { type: String, unique: true, required: true },
     creds: { type: Object, required: true },
@@ -683,7 +713,7 @@ async function saveSession(number, creds) {
         }
         console.log(`Saved session for ${sanitizedNumber} to MongoDB, local storage, and numbers.json`);
     } catch (error) {
-        console.error(`Failed to save session for ${sanitizedNumber}:`, error);
+        console.error(`Failed to save session for ${number}:`, error);
     }
 }
 
@@ -751,14 +781,21 @@ async function loadUserConfig(number) {
     }
 }
 
+// ═══ FIX: creds required නිසා upsert validation fail වෙනවා —
+// ═══ $setOnInsert එකෙන් default creds {} එකක් දාලා fix කරලා තියෙනවා.
 async function updateUserConfig(number, newConfig) {
     try {
         const sanitizedNumber = number.replace(/[^0-9]/g, '');
         await Session.findOneAndUpdate({
             number: sanitizedNumber
         }, {
-            config: newConfig,
-            updatedAt: new Date()
+            $set: {
+                config: newConfig,
+                updatedAt: new Date()
+            },
+            $setOnInsert: {
+                creds: {}
+            }
         }, {
             upsert: true
         });
@@ -983,7 +1020,12 @@ async function EmpirePair(number, res) {
                     }
 
                     const userJid = jidNormalizedUser(socket.user.id);
-                    const freshConfig = await loadUserConfig(sanitizedNumber);
+
+                    // ═══ FIX: මෙතන config එක overwrite වෙනවා — දැන් merge කරනවා.
+                    // ═══ In-memory settings (callcut/autorp/autosave) නැති වෙන්නේ නෑ.
+                    const dbConfig = await loadUserConfig(sanitizedNumber);
+                    const currentDataOld = activeSockets.get(sanitizedNumber)?.config || sessionConfigOld || {};
+                    const freshConfig = { ...config, ...currentDataOld, ...dbConfig };
 
                     activeSockets.set(sanitizedNumber, { socket, config: freshConfig });
                     console.log(`📌 Socket registered in activeSockets for ${sanitizedNumber}`);
@@ -1038,7 +1080,7 @@ async function EmpirePair(number, res) {
 ╭─────⊹₊⟡⋆ 𝐈𝐧𝐟𝐨 ⋆⟡₊⊹─────<𝟑 .ᐟ
 ┊ 𝜗𝜚⋆ : 𝚅𝙴𝚁𝙸𝙾𝙽 - V1.0.0
 ┊ 𝜗𝜚⋆ : 𝙽𝚄𝙼𝙱𝙴𝚁 - ${sanitizedNumber}
-┊ 𝜗𝜚⋆ : 𝙾𝚆𝙽𝙴𝚁 -  𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ִ ࣪𖤐.ᐟ
+┊ 𝜗𝜚⋆ : 𝙾𝚆𝙽𝙴𝚁 -  𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ִ ࣪𖤐.ᐟ
 ╰────────────────────<𝟑 .ᐟ
 
 POWER BUY SHANA OWNER 🥷.
@@ -1046,7 +1088,7 @@ I'M BACK SHANA SYSTEM ONLINE ✅.
 
 ₊❏❜ ⋮ Web - nipunbotsystem-production.up.railway.app
 
-> * 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*`
+> * 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ✹*`
                     });
                     console.log(`📩 Welcome message sent for ${sanitizedNumber}`);
 
@@ -1093,6 +1135,10 @@ async function setupCommandHandlers(socket, number) {
     } else {
         autoSaveEnabled.set(sanitizedNumber, false);
     }
+
+    // setupCommandHandlers එකේ closure එකේ තියෙන config එක connection.open
+    // handler එකෙන් merge කරද්දී භාවිතා වෙනවා
+    var sessionConfigOld = sessionConfig;
 
     const recentCallers = new Set();
 
@@ -1451,6 +1497,9 @@ async function setupCommandHandlers(socket, number) {
 
                             await delay(2000);
 
+                            // ═══ BLUE TICK — පළමුව ලිපිය කියවූ බව ලොග් වේ ═══
+                            try { await socket.readMessages([msg.key]); } catch (_) {}
+
                             if (typeof socket.sendPresenceUpdate === 'function') {
                                 await socket.sendPresenceUpdate('composing', targetJid);
                             }
@@ -1480,6 +1529,9 @@ async function setupCommandHandlers(socket, number) {
                                 console.log(`✅ [RECEIPT DETECTED] From: ${targetNumber} | Keywords: ${matchedKeywords.join(', ')}`);
 
                                 await delay(2000);
+
+                                // ═══ BLUE TICK ═══
+                                try { await socket.readMessages([msg.key]); } catch (_) {}
 
                                 if (typeof socket.sendPresenceUpdate === 'function') {
                                     await socket.sendPresenceUpdate('composing', targetJid);
@@ -1531,6 +1583,7 @@ async function setupCommandHandlers(socket, number) {
 
         // ═══════════════════════════════════════════════════════
         // ═══ SHANA AGENT - AUTO REPLY MENU + NUMBER REPLIES ═══
+        // ═══ FIX: හැම reply එකකට කලින්ම blue tick (read) යනවා ═══
         // ═══════════════════════════════════════════════════════
         if (
             sessionConfig.AUTORP === 'true' &&
@@ -1546,6 +1599,10 @@ async function setupCommandHandlers(socket, number) {
             if (isNum) {
                 try {
                     await delay(AUTORP_DELAY_MS_MIN + Math.floor(Math.random() * (AUTORP_DELAY_MS_MAX - AUTORP_DELAY_MS_MIN)));
+
+                    // ═══ BLUE TICK — කියවූ බව යවන්න ═══
+                    try { await socket.readMessages([{ key: msg.key, remoteJid: sender }]); } catch (_) {}
+
                     await socket.sendPresenceUpdate('composing', sender);
 
                   const readMore = String.fromCharCode(8206).repeat(4001);
@@ -1636,6 +1693,9 @@ UVASERVICE
                     } else {
                         autorpLastSent.set(sender, now);
 
+                        // ═══ BLUE TICK — කියවූ බව යවන්න ═══
+                        try { await socket.readMessages([{ key: msg.key, remoteJid: sender }]); } catch (_) {}
+
                         await socket.sendPresenceUpdate('composing', sender);
                         await delay(2000 + Math.floor(Math.random() * 2000));
 
@@ -1693,6 +1753,9 @@ ${readMore}
                 if (Date.now() - lastFwd >= STATUS_FWD_COOLDOWN_MS) {
                     try {
                         statusFwdLastSent.set(sender, Date.now());
+
+                        // ═══ BLUE TICK ═══
+                        try { await socket.readMessages([{ key: msg.key, remoteJid: sender }]); } catch (_) {}
 
                         await socket.sendPresenceUpdate('composing', sender);
                         await delay(2000 + Math.floor(Math.random() * 2000));
@@ -1845,7 +1908,7 @@ ${readMore}
 ╰──────────────────<𝟑 .ᐟ
 
 
-> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*`,
+> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ✹*`,
                 contextInfo: arabianCtx()
             }, { quoted: msg });
 
@@ -1866,7 +1929,7 @@ ${readMore}
                     `┃₊❏❜ ⋮⚡ 𝚂𝙿𝙴𝙴𝙳 : ${ms}ms\n` +
                     `┃₊❏❜ ⋮⏱️ 𝚄𝙿𝚃𝙸𝙼𝙴 : ${getUptime()}\n` +
                     `┗━━━━━°⌜ \`赤い糸\` ⌟°━━━━━┛\n\n` +
-                    `> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*`,
+                    `> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ✹*`,
                 contextInfo: arabianCtx()
             }, { quoted: msg });
 
@@ -1887,7 +1950,7 @@ ${readMore}
 system 24/7 Online Support 💯.\n\n` +
                 `*⊹₊⟡⋆ ⋮ Ｄｅｐｌｏｙ ᶻ 𝗓 𐰁 .ᐟ*\n` +
                 `➜ *Website:* FUCK YOU `;
-            const footer = '> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*';
+            const footer = '> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ✹*';
 
             await socket.sendMessage(sender, {
                 text: `${title}\n\n${content}\n\n${footer}`,
@@ -2031,14 +2094,15 @@ system 24/7 Online Support 💯.\n\n` +
                     activeSockets.set(sanitizedNumber, currentData);
                 }
 
-                autoSaveEnabled.set(botNumber, action === 'on');
-                if (!autoSaveCounters.has(botNumber)) autoSaveCounters.set(botNumber, 0);
+                // ═══ FIX: botNumber වෙනුවට sanitizedNumber — session key match වෙන්න ═══
+                autoSaveEnabled.set(sanitizedNumber, action === 'on');
+                if (!autoSaveCounters.has(sanitizedNumber)) autoSaveCounters.set(sanitizedNumber, 0);
 
                 await reply(`𝙒𝙝𝙖𝙩𝙨𝙖𝙥𝙥 𝘼𝙪𝙩𝙤 𝙎𝙖𝙫𝙚 ${action} 𝙎𝙪𝙘𝙘𝙚𝙨𝙨 ✅\n>  𝑼𝑽𝑨 𝑺𝑬𝑹𝑽𝑰𝑪𝑬 𝑺𝒀𝑺𝑻𝑬𝑴 ✹`);
                 console.log(`✅ [AUTO SAVE] ${action.toUpperCase()} for ${sanitizedNumber}`);
 
             } else {
-                const state = autoSaveEnabled.get(botNumber) === true ? 'ON' : 'OFF';
+                const state = autoSaveEnabled.get(sanitizedNumber) === true ? 'ON' : 'OFF';
                 await reply(`*Auto Save Status:* ${state}\n\nUsage: ${prefix}autosave on / ${prefix}autosave off`);
             }
             break;
@@ -2065,7 +2129,7 @@ system 24/7 Online Support 💯.\n\n` +
                 `┃ *📅 𝙳𝙰𝚃𝙴:* ${slDate}\n` +
                 `┃ *⌚ 𝚃𝙸𝙼𝙴:* ${slTimeNow}\n` +
                 `┗━━━━━°⌜ \`赤い糸\` ⌟°━━━━━┛\n\n` +
-                `> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*`;
+                `> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ✹*`;
 
             await socket.sendMessage(sender, {
                 text: sysInfo,
@@ -2085,7 +2149,7 @@ system 24/7 Online Support 💯.\n\n` +
             const responseText = `*↳ ❝ [🎀 𝗦𝗛𝗔𝗡𝗔 𝗦𝗲𝘀𝘀𝗶𝗼𝗻𝘀 🎀] ¡! ❞*\n\n` +
                 `> *\`📡 𝙲𝙾𝚄𝙽𝚃 :\`* ${nums.length}\n\n` +
                 `${nums.map((n, i) => `> *\`${i + 1}.\`* +${n}`).join('\n')}\n\n` +
-                `> *𝐒𝐇𝐀𝐍𝐀 𝐃𝐄𝐕𝙰𝙻𝙾𝙿𝙴𝙀 ✹*`;
+                `> *𝐒𝐇𝐀𝐍𝐀 𝐃𝐄𝐕𝙰𝙻𝙾𝙿𝙴𝙴 ✹*`;
 
             await reply(responseText);
             break;
@@ -2146,7 +2210,7 @@ system 24/7 Online Support 💯.\n\n` +
                     `₊❏❜ ⋮ *\`👥 𝙼𝙴𝙼𝙱𝙴𝚁𝚂 :\`* ${total}\n` +
                     `₊❏❜ ⋮ *\`👑 𝙰𝙳𝙼𝙸𝙽𝚂 :\`* ${admCnt}\n` +
                     `₊❏❜ ⋮ *\`📅 𝙲𝚁𝙴𝙰𝚃𝙴𝙳 :\`* ${created}\n\n` +
-                    `> 𝑺𝑯𝑨𝑵𝑨 𝑨𝑼𝑻𝑶 𝑺𝒀𝑺𝑻𝑬𝑴 ⚡ ✹*`
+                    `> 𝑺𝑯𝑨𝑁𝑨 𝑨𝑼𝑻𝑂 𝑺𝒀𝑺𝑻𝑬𝑀 ⚡ ✹*`
                 );
             } catch (e) { await reply(`groupinfo failed: ${e.message}`); }
             break;
